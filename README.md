@@ -9,11 +9,11 @@ multiplicação direta. Este projeto utiliza a biblioteca padrão do Python, gar
 Um algoritmo usual de multiplicação resolve um cálculo em tempo proporcional a *n²*, sendo *n* o número máximo de algarismos naturais do maior fator. O algoritmo de Karatsuba reduz uma grande multiplicação para 3 pequenas, tornando o cálculo mais eficiente.
 
 **Considerando**:
-*num1* e *num2* = números com no máximo *n* dígitos
-*esq1* = n/2 primeiros dígitos (dígitos mais significativos) de *num1*
-*dir1* = n/2 últimos dígitos (dígitos menos significativos) de *num1*
-*esq2* = n/2 primeiros dígitos (dígitos mais significativos) de *num2*
-*dir2* = n/2 últimos dígitos (dígitos menos significativos) de *num2*
+- *num1* e *num2* = números com no máximo *n* dígitos
+- *esq1* = n/2 primeiros dígitos (dígitos mais significativos) de *num1*
+- *dir1* = n/2 últimos dígitos (dígitos menos significativos) de *num1*
+- *esq2* = n/2 primeiros dígitos (dígitos mais significativos) de *num2*
+- *dir2* = n/2 últimos dígitos (dígitos menos significativos) de *num2*
 
 **Então**:
 
@@ -24,6 +24,7 @@ exemplo: `1234 = 12 * 10^2 + 34 = 1200+34 = 1234`
 **Descrição do cálculo**:
 
     num1 * num2 = (esq1 * 10^n/2 + dir1)*(esq2 * 10^n/2 + dir2)
+    num1 * num2 = esq1 * esq2 * 10^n + esq1 * dir2 * 10^n/2 + dir1 * esq2 * 10^n/2 + dir1 * dir2
     num1 * num2 = esq1 * esq2 * 10^n + (esq1 * dir2 + dir1 * esq2) * 10^n/2 + dir1 * dir2
 
 A última linha possui 4 multiplicações relevantes porque a multiplicação pro 10^n representa um deslocamento (=*shift*) do vetor para a esquerda, o que é mais barato que uma multiplicação pois consome n unidades de tempo. Assim sendo, A expressão reduz a multiplicação de dois números com no máximo n dígitos para quatro multiplicações de números com no máximo n/2 dígitos cada.
@@ -34,7 +35,7 @@ Podemos reescrever a fórmula da seguinte maneira:
 
     num1 * num2 = dir1 * dir2 * 10^2m + (y - esq1 * esq2 - dir1 * dir2) * 10^m + dir1 * dir2
 
-Essa alteração reduz uma multiplicação.
+Essa alteração reduz uma multiplicação, resultando em um total de 3.
 
 ## Lógica do algoritmo implementado
 #### Linha 1
@@ -75,15 +76,41 @@ Por fim, é feita a conquista com a combinação das 3 recursões por meio da se
     `python3 -m venv .venv`
 
 2.  Ative o ambiente virtual:
-    -   No macOS e Linux
-        `source .venv/bin/activate`
-    -   No Windows:
-        `.venv\Scripts\activate`
+    -   No macOS e Linux: `source .venv/bin/activate`
+    -   No Windows: `.venv\Scripts\activate`
 
 ### Passo 2: Executar o script
-Após ativar o ambiente virtual, execute o script principal:
-
-    python main.py
+Após ativar o ambiente virtual, execute o script principal: `python main.py`
 
 ### Versão do Python
 Este projeto foi desenvolvido na versão  **3.13.2**  do Python e  **não exige a instalação de nenhuma dependência adicional**.
+
+## Relatório técnico
+### Análise da complexidade ciclomática
+#### Fluxo de Controle da função
+1. verificação se um dos números é <10
+2. se 1 for verdadeiro: retorna o resultado da multiplicação
+3. se 1 for falso: variável n recebe o número que representa a maior quantidade de algarismos dentro dos valores recebidos na função
+4. variável m recebe a metáde da variável n
+5. as variáveis esq1 e dir1 recebem os valores da divisão e do resto de num1 por 10^n/2
+6. as variáveis esq2 e dir2 recebem os valores da divisão e do resto de num2 por 10^n/2
+7. a variável rec1 recebe o resultado de esq1 * esq2
+8. a variável rec2 recebe o resultado de dir1 * dir2
+9. a variável rec3 recebe o resultado da multiplicação das somas (dir1+esq1) e (dir2+esq2)
+10. retorno da função de combinação dos resultados
+
+#### Grafo de fluxo de controle
+![Fluxo de Controle](images/grafo-karatsuba.jpg)
+
+#### Cálculo da complexidade ciclomática
+
+    M = E - N + 2P
+    M = 9 - 10 + 2(1)
+    m = 2
+
+### Análise da complexidade assintótica
+- complexidade temporal
+  O algoritmo de Karatsuba divide a multiplicação em três chamadas recursivas, reduzindo o tamanho dos números pela metade a cada etapa. Podemos expressar a complexidade temporal pela seguinte recorrência: `T(n)=3T(n/2)+O(n)`
+
+- complexidade espacial
+  Como cada chamada divide o problema pela metade, a recursão tem profundidade `O(logn)`
